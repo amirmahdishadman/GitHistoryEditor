@@ -1,0 +1,40 @@
+#!/bin/bash
+
+MODE=$1
+
+if [[ $MODE == "B" ]]; then
+
+    COMMITS="""$(cat ./commits.txt)"""
+    FILTER=""
+    while read -r commit
+    do
+        echo $commit
+        IFS=','
+        read -ra elements <<< "$commit"
+        NEW="""
+        if [ "\$GIT_COMMIT" = "${elements[0]}" ]
+        then
+            export GIT_COMMITTER_NAME="${elements[1]}"
+            export GIT_COMMITTER_EMAIL="${elements[2]}"
+            export GIT_AUTHOR_NAME="${elements[1]}"
+            export GIT_AUTHOR_EMAIL="${elements[2]}"
+            export GIT_COMMITTER_DATE="${elements[3]}"
+        fi
+        """
+        FILTER=${FILTER}${NEW}
+  
+    done <<< "${COMMITS}"
+    echo $FILTER
+    git filter-branch -f --env-filter ${FILTER} --tag-name-filter cat -- --branches --tags
+fi
+
+if [[ $MODE == "A" ]]; then
+# Output file name
+output_file="commits.txt"
+
+# Generate commit hashes and write to file
+git log --pretty=format:"%H,%an,%ae,%aI" > "$output_file"
+
+echo "Commit hashes have been written to $output_file"
+fi
+
