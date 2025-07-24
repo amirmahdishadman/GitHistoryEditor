@@ -1,5 +1,5 @@
 # GitHistoryEditor
-a script to edit all commits author and datetime
+Script to edit all commits author and datetime
 
 usage:
 first run ./Script A
